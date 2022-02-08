@@ -72,7 +72,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String _contact_person_name = "";
   String file_path = "";
   String _call_notes = "";
+
   String _extn = ""; // extn.first;
+  bool _new_encounter = false;
   bool _enabledNewCase = false;
   bool _enabledNewEncounter = true;
 
@@ -106,30 +108,31 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-
-
-
   Future checkMutual(str_caller) async {
-
-        if (str_caller == "new_case"  ){
-          if (_is_new == true ) {
-            _is_new_encounter = false;
-          }
-        }
-        if (str_caller == "new_encounter"){
-          if (_is_new_encounter == true){
-            _is_new = false;
-
-
-          }
-        }
-        if (_is_new_encounter == false && _is_new == false) {
-          _enableEncounter = true;
-        }
-          else{
-
-            _enableEncounter = false;
-        }
+    if (str_caller == "new_case") {
+      if (_is_new == true) {
+        _is_new_encounter = false;
+        _enabledNewCase = true;
+        _enabledDropdownNewEnc = true;
+        _encounter = "1";
+      }
+    }
+    if (str_caller == "new_encounter") {
+      if (_is_new_encounter == true) {
+        _is_new = false;
+        _encounter = "1";
+        _enabledNewCase = false;
+        _clientId = "";
+      }
+      _enabledDropdownNewCase = false;
+    }
+    if (_is_new_encounter == false && _is_new == false) {
+      _enableEncounter = true;
+      _enabledDropdownNewEnc = false;
+    } else {
+      _enableEncounter = false;
+      _enabledDropdownNewEnc = true;
+    }
 
 //    if (_is_new == true && _is_new_encounter == false) {
 //      _is_new = false;
@@ -291,6 +294,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     str_data =
                         str_data + "case_type:" + _caseType.toString() + "####";
+                    str_data = str_data +
+                        "new_encounter:" +
+                        _new_encounter.toString() +
+                        "####";
 
                     if (_is_new == true) {
                       pre_name = "New_Case";
@@ -350,8 +357,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           value: _is_new,
                           onChanged: (bool? value) {
                             setState(() {
-
-
                               _is_new = value!;
                               _enabledDropdownNewCase = value;
                               _enabledNewCase = value;
@@ -463,10 +468,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           value: _is_new_encounter,
                           onChanged: (bool? value) {
                             setState(() {
-
+                              _new_encounter = value!;
                               _is_new_encounter = value!;
                               _enabledNewEncounter = !value;
-                              _enabledDropdownNewEnc = value;
+
                               caseController.clear();
                               _case_id = "";
                               checkMutual('new_encounter');
