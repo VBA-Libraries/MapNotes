@@ -61,7 +61,7 @@ class TabsState extends State<CallTabs> {
       setState(() {
         list.clear();
 
-        list.addAll(result);
+        list.addAll(result); 
         list.removeWhere((element) {
           return element["name"] == "Processed_Calls";
         });

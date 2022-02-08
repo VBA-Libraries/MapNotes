@@ -40,6 +40,19 @@ final users = {
   "1039": "M\$inc2113",
   "1040": "M\$inc6398",
 };
+final client_id = [
+  "",
+  "564",
+  "565",
+  "566"
+];
+
+final caseType = [
+  "",
+  "MCM",
+  "CR",
+  "DUMMY"
+];
 
 final encounters = [
   "1",

@@ -8,6 +8,7 @@ import 'constants.dart';
 import 'package:date_format/date_format.dart';
 
 import 'dropbox.dart';
+
 //
 // class MyApp extends StatelessWidget {
 //   // This widget is the root of your application.
@@ -50,11 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
   String _case_id = "";
   String _tx_type = "";
   String _encounter = "1";
+  String _caseType = "";
+  String _clientId = "";
   String _call_dir = "";
   String _policy_no = "";
   String _member_name = "";
   String _caller_name = "";
   String _calling_from_no = "";
+
   // DateTime _DOB = DateTime.now();
   String _country = ""; //countries.first;
   String _transfer_from = "";
@@ -69,12 +73,19 @@ class _MyHomePageState extends State<MyHomePage> {
   String file_path = "";
   String _call_notes = "";
   String _extn = ""; // extn.first;
-  bool _enabled = true;
+  bool _enabledNewCase = false;
+  bool _enabledNewEncounter = true;
+
+  bool _enabledDropdownNewCase = false;
+  bool _enabledDropdownNewEnc = false;
+  bool _enableEncounter = false;
+  bool _enable_case_id = true;
 
   // String _call_loc = ""; //location.first;
   bool _is_admin = false;
   String str_data = "";
   bool _is_new = false;
+  bool _is_new_encounter = false;
   bool _eoc = false;
   String pre_name = "";
 
@@ -85,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController caseController = new TextEditingController();
   TextEditingController locationController = new TextEditingController();
   TextEditingController phoneToController = new TextEditingController();
+
   Future initDropbox() async {
     await Dropbox.init(dropbox_clientId, dropbox_key, dropbox_secret);
 
@@ -92,6 +104,58 @@ class _MyHomePageState extends State<MyHomePage> {
     accessToken = prefs.getString('dropboxAccessToken');
 
     setState(() {});
+  }
+
+
+
+
+  Future checkMutual(str_caller) async {
+
+        if (str_caller == "new_case"  ){
+          if (_is_new == true ) {
+            _is_new_encounter = false;
+          }
+        }
+        if (str_caller == "new_encounter"){
+          if (_is_new_encounter == true){
+            _is_new = false;
+
+
+          }
+        }
+        if (_is_new_encounter == false && _is_new == false) {
+          _enableEncounter = true;
+        }
+          else{
+
+            _enableEncounter = false;
+        }
+
+//    if (_is_new == true && _is_new_encounter == false) {
+//      _is_new = false;
+//      _enabledDropdownNewCase = false;
+//      _enabledNewCase = false;
+//
+//
+//      /*print("checkingMutual");
+//        if(caller == "new_case"){
+//          _is_new_encounter = false;
+//        }else if(caller == "new_encounter"){
+//          _is_new = false;
+//        }*/
+//    } else if ( _is_new == false && _is_new_encounter == true) {
+//      _is_new_encounter = false;
+//      _enabledNewEncounter = false;
+//      _enabledDropdownNewEnc = false;
+//    }
+//    print(_is_new);
+//    print(_is_new_encounter);
+//    if(_is_new == true || _is_new_encounter  == true){
+//
+//      _enableEncounter = true;
+//    }else{
+//      _enableEncounter = false;
+//    }
   }
 
   Future check_login() async {
@@ -112,6 +176,12 @@ class _MyHomePageState extends State<MyHomePage> {
     if (user_name == "") {
       Navigator.pushNamed(context, '/login');
     }
+
+    /*if(_is_new == true){
+      enabled = true;
+    }else{
+      enabled = false;
+    }*/
 
     //listFolder('/Dropbox_Calls');
   }
@@ -216,6 +286,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
                     str_data = str_data + "eoc:" + _eoc.toString() + "####";
 
+                    str_data =
+                        str_data + "client_id:" + _clientId.toString() + "####";
+
+                    str_data =
+                        str_data + "case_type:" + _caseType.toString() + "####";
+
                     if (_is_new == true) {
                       pre_name = "New_Case";
                     } else {
@@ -261,33 +337,48 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 // new case, case id, encounter
+                //making UI now TODO: need to change with desired functions
+                Container(
+                  color: Color(0x95e0dfff),
+                  child: Row(
+                    children: [
+                      //New case checkbox
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: Text("New Case"),
+                          // title: const Text('Animate Slowly'),
+                          value: _is_new,
+                          onChanged: (bool? value) {
+                            setState(() {
+
+
+                              _is_new = value!;
+                              _enabledDropdownNewCase = value;
+                              _enabledNewCase = value;
+                              caseController.clear();
+                              _case_id = "";
+                              checkMutual('new_case');
+                            });
+                          },
+                        ),
+                      ),
+
+                      Expanded(
+                        child: SizedBox(),
+                      ),
+                    ],
+                  ),
+                ),
                 Row(
                   children: [
-                    //New case checkbox
-                    Expanded(
-                      flex: 2,
-                      child: CheckboxListTile(
-                        title: Text("New Case"),
-                        // title: const Text('Animate Slowly'),
-                        value: _is_new,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _is_new = value!;
-                            _enabled = !value;
-                            caseController.clear();
-                            _case_id = "";
-                          });
-                        },
-                      ),
-                    ),
-
                     //Case ID
+                    // Member name, caller name
                     Flexible(
                       flex: 2,
                       child: TextFormField(
-                        enabled: _enabled,
+                        enabled: _enabledNewCase,
                         controller: caseController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value!.isEmpty && _policy_no.isEmpty) {
                             return 'Please enter Policy No or Case ID';
@@ -298,15 +389,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           border: OutlineInputBorder(),
 
                           // floatingLabelBehavior: FloatingLabelBehavior.always,
-                          labelText: "Case ID",
+                          labelText: "Member Name",
 
-                          // hintText: "Case ID",
+                          // hintText: "Member Name",
                           contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                           focusColor: Colors.yellow[10],
                           fillColor: Colors.yellow[50],
                         ),
                         onChanged: (text) {
-                          _case_id = text;
+                          _member_name = text;
                         },
                       ),
                     ),
@@ -317,7 +408,89 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
                         child: DropdownButtonFormField(
+                            value: _clientId,
+                            // hint: Text(" Enc", overflow: TextOverflow.ellipsis),
+                            validator: (value) {
+                              if (value == "" && _is_new == true) {
+                                return 'Please enter Client ID';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(8, 10, 0, 0),
+                                border: OutlineInputBorder(),
+                                filled: true,
+                                // contentPadding: EdgeInsets.all(0.0),
+                                fillColor: Color(0xecedec),
+                                labelText: "Client ID"),
+                            items: client_id
+                                .map((e) => new DropdownMenuItem(
+                                      value: e,
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            10, 0, 0, 0),
+                                        child: Text(e,
+                                            overflow: TextOverflow.ellipsis),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: _enabledDropdownNewCase
+                                ? (String? newValue) {
+                                    setState(() {
+                                      //print(newValue);
+                                      _clientId = newValue!;
+                                    });
+                                  }
+                                : null),
+                      ),
+                    ),
+                  ],
+                ),
+                //building the UI. TODO: functioning need to be dome
+                //Divider(color: Colors.white),
+                Divider(height: 10),
+                Container(
+                  color: Color(0x95e0dfff),
+                  child: Row(
+                    children: [
+                      //New encounter checkbox
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: Text("New Encounter"),
+                          // title: const Text('Animate Slowly'),
+                          value: _is_new_encounter,
+                          onChanged: (bool? value) {
+                            setState(() {
+
+                              _is_new_encounter = value!;
+                              _enabledNewEncounter = !value;
+                              _enabledDropdownNewEnc = value;
+                              caseController.clear();
+                              _case_id = "";
+                              checkMutual('new_encounter');
+                              //enableCaseID();
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: SizedBox(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
+                        child: DropdownButtonFormField(
                             value: _encounter,
+
                             // hint: Text(" Enc", overflow: TextOverflow.ellipsis),
                             decoration: InputDecoration(
                                 alignLabelWithHint: true,
@@ -327,7 +500,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 filled: true,
                                 // contentPadding: EdgeInsets.all(0.0),
                                 fillColor: Color(0xecedec),
-                                labelText: "Encounter"),
+                                labelText: "Enc"),
                             items: encounters
                                 .map((e) => new DropdownMenuItem(
                                       value: e,
@@ -339,12 +512,89 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ),
                                     ))
                                 .toList(),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                print(newValue);
-                                _encounter = newValue!;
-                              });
-                            }),
+                            onChanged: _enableEncounter
+                                ? (String? newValue) {
+                                    setState(() {
+                                      print(newValue);
+                                      _encounter = newValue!;
+                                    });
+                                  }
+                                : null),
+                      ),
+                    ),
+
+                    Expanded(
+                      flex: 3,
+                      child: TextFormField(
+                        enabled: !_is_new,
+                        keyboardType: TextInputType.text,
+                        //enabled: _enabledNewCase,
+                        validator: (value) {
+                          if (value == "" && _is_new_encounter == true) {
+                            return 'Please enter Case ID';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "Case ID",
+                          contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          border: OutlineInputBorder(),
+                          //floatingLabelBehavior:
+                          //  FloatingLabelBehavior.always,
+                          // hintText: "Case ID",
+                          focusColor: Colors.yellow[100],
+                          fillColor: Colors.yellow[50],
+                        ),
+                        onChanged: (text) {
+                          setState(() {
+                            _case_id = text;
+                          });
+                        },
+                      ),
+                    ),
+                    //Case ID
+                    //Encounter
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
+                        child: DropdownButtonFormField(
+                            value: _caseType,
+                            // hint: Text(" Enc", overflow: TextOverflow.ellipsis),
+                            validator: (value) {
+                              if (value == "" && _is_new_encounter == true) {
+                                return 'Please enter Case Type';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(8, 10, 0, 0),
+                                border: OutlineInputBorder(),
+                                filled: true,
+                                // contentPadding: EdgeInsets.all(0.0),
+                                fillColor: Color(0xecedec),
+                                labelText: "Case Type"),
+                            items: caseType
+                                .map((e) => new DropdownMenuItem(
+                                      value: e,
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            10, 0, 0, 0),
+                                        child: Text(e,
+                                            overflow: TextOverflow.ellipsis),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: _enabledDropdownNewEnc
+                                ? (String? newValue) {
+                                    setState(() {
+                                      print(newValue);
+                                      _caseType = newValue!;
+                                    });
+                                  }
+                                : null),
                       ),
                     ),
                   ],
@@ -424,28 +674,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //Member name, caller name
                 Row(
                   children: [
-                    //Member Name
-                    Expanded(
-                      child: TextFormField(
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          labelText: "Member Name",
-                          contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                          border: OutlineInputBorder(),
-                          //floatingLabelBehavior:
-                          //  FloatingLabelBehavior.always,
-                          // hintText: "Member Name",
-                          focusColor: Colors.yellow[100],
-                          fillColor: Colors.yellow[50],
-                        ),
-                        onChanged: (text) {
-                          setState(() {
-                            _member_name = text;
-                          });
-                        },
-                      ),
-                    ),
-                    //Caller Name
+                    //Member Name changed to Case ID. TODO: functioning need to be implemented
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 String? accessToken;
 String? user_name;
 final String dropbox_clientId = 'test-flutter-dropbox';
-final String dropbox_key = 'p2ba1tf4kix6fvt';
-final String dropbox_secret = 'uuzuw6b3fws5z95';
+final String dropbox_key = 'vxooaj64rvzw9m2';
+final String dropbox_secret = 'xslni7eimbald75';
 
 Future<String?> getTemporaryLink(path) async {
   final result = await Dropbox.getTemporaryLink(path);
@@ -73,7 +73,7 @@ Future uploadTest(
       );
       reset_form();
     });
-    // print(result);
+    print(result);
   }
 }
 
