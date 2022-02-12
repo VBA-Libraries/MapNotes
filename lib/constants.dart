@@ -1,6 +1,6 @@
 final location = ["", "INTL", "Domestic"];
 final contact = ["", "Caller Name", "Spoke To", "Attendants"];
-final tx_types = ["", "WT", "C", "T", "DC"];
+final tx_types = ["","DC - Direct Call", "WT - Warm Call", "CT - Cold Tx", "WT Warm Tx", "Out"];
 final users = {
   "1001": "M@inc8253",
   "1002": "M\$inc7387",

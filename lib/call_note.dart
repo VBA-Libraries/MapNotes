@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _is_new = false;
   bool _is_new_encounter = false;
   bool _eoc = false;
+  bool eraseDropdown = true;
   String pre_name = "";
 
   final _formKey = GlobalKey<FormState>();
@@ -98,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController caseController = new TextEditingController();
   TextEditingController locationController = new TextEditingController();
   TextEditingController phoneToController = new TextEditingController();
+  TextEditingController caseIdController = new TextEditingController();
 
   Future initDropbox() async {
     await Dropbox.init(dropbox_clientId, dropbox_key, dropbox_secret);
@@ -208,6 +210,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _formKey.currentState!.reset();
       caseController.clear();
       phoneController.clear();
+      caseIdController.clear();
+      eraseDropdown = true;
+
     }
 
     return Scaffold(
@@ -225,8 +230,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: ElevatedButton.styleFrom(primary: Colors.green),
                 child: Text("Save"),
                 onPressed: () {
-                  var flag = _formKey.currentState!.validate();
-                  if (flag = true && _eoc == true) {
+                  bool flag_1 = _formKey.currentState!.validate();
+
+                  if (flag_1 == true && _eoc == true) {
                     // If the form is valid, display a snackbar. In the real world,
                     // you'd often call a server or save the information in a database.
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -307,8 +313,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     String file_name = pre_name +
                         "_" +
                         formatDate(
-                            DateTime.now(), ["yyyy", "mm", "dd", "hh", "mm"]);
+                            DateTime.now(), ["yyyy", "mm", "dd", "hh", "ss"]);
                     // print(file_name);
+                    // _write(str_data, "1");
                     // _write(str_data, "1");
                     uploadTest(file_name, str_data, context, reset_form);
 
@@ -361,6 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               _enabledDropdownNewCase = value;
                               _enabledNewCase = value;
                               caseController.clear();
+                              caseIdController.clear();
                               _case_id = "";
                               checkMutual('new_case');
                             });
@@ -413,6 +421,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
                         child: DropdownButtonFormField(
+
                             value: _clientId,
                             // hint: Text(" Enc", overflow: TextOverflow.ellipsis),
                             validator: (value) {
@@ -424,30 +433,32 @@ class _MyHomePageState extends State<MyHomePage> {
                             decoration: InputDecoration(
                                 alignLabelWithHint: true,
                                 contentPadding:
-                                    EdgeInsets.fromLTRB(8, 10, 0, 0),
+                                EdgeInsets.fromLTRB(8, 10, 0, 0),
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 // contentPadding: EdgeInsets.all(0.0),
                                 fillColor: Color(0xecedec),
                                 labelText: "Client ID"),
                             items: client_id
-                                .map((e) => new DropdownMenuItem(
-                                      value: e,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            10, 0, 0, 0),
-                                        child: Text(e,
-                                            overflow: TextOverflow.ellipsis),
-                                      ),
-                                    ))
+                                .map((e) =>
+                            new DropdownMenuItem(
+                              value: e,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    10, 0, 0, 0),
+                                child: Text(e,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                            ))
                                 .toList(),
+                            //TODO
                             onChanged: _enabledDropdownNewCase
                                 ? (String? newValue) {
-                                    setState(() {
-                                      //print(newValue);
-                                      _clientId = newValue!;
-                                    });
-                                  }
+                              setState(() {
+                                //print(newValue);
+                                _clientId = newValue!;
+                              });
+                            }
                                 : null),
                       ),
                     ),
@@ -500,30 +511,31 @@ class _MyHomePageState extends State<MyHomePage> {
                             decoration: InputDecoration(
                                 alignLabelWithHint: true,
                                 contentPadding:
-                                    EdgeInsets.fromLTRB(8, 10, 0, 0),
+                                EdgeInsets.fromLTRB(8, 10, 0, 0),
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 // contentPadding: EdgeInsets.all(0.0),
                                 fillColor: Color(0xecedec),
                                 labelText: "Enc"),
                             items: encounters
-                                .map((e) => new DropdownMenuItem(
-                                      value: e,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            10, 0, 0, 0),
-                                        child: Text(e,
-                                            overflow: TextOverflow.ellipsis),
-                                      ),
-                                    ))
+                                .map((e) =>
+                            new DropdownMenuItem(
+                              value: e,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    10, 0, 0, 0),
+                                child: Text(e,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                            ))
                                 .toList(),
                             onChanged: _enableEncounter
                                 ? (String? newValue) {
-                                    setState(() {
-                                      print(newValue);
-                                      _encounter = newValue!;
-                                    });
-                                  }
+                              setState(() {
+                                print(newValue);
+                                _encounter = newValue!;
+                              });
+                            }
                                 : null),
                       ),
                     ),
@@ -531,11 +543,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     Expanded(
                       flex: 3,
                       child: TextFormField(
+                        controller: caseIdController,
                         enabled: !_is_new,
-                        keyboardType: TextInputType.text,
+                        keyboardType: TextInputType.number,
                         //enabled: _enabledNewCase,
                         validator: (value) {
-                          if (value == "" && _is_new_encounter == true) {
+                          if (value == "") {
                             return 'Please enter Case ID';
                           }
                           return null;
@@ -575,30 +588,31 @@ class _MyHomePageState extends State<MyHomePage> {
                             decoration: InputDecoration(
                                 alignLabelWithHint: true,
                                 contentPadding:
-                                    EdgeInsets.fromLTRB(8, 10, 0, 0),
+                                EdgeInsets.fromLTRB(8, 10, 0, 0),
                                 border: OutlineInputBorder(),
                                 filled: true,
                                 // contentPadding: EdgeInsets.all(0.0),
                                 fillColor: Color(0xecedec),
                                 labelText: "Case Type"),
                             items: caseType
-                                .map((e) => new DropdownMenuItem(
-                                      value: e,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            10, 0, 0, 0),
-                                        child: Text(e,
-                                            overflow: TextOverflow.ellipsis),
-                                      ),
-                                    ))
+                                .map((e) =>
+                            new DropdownMenuItem(
+                              value: e,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    10, 0, 0, 0),
+                                child: Text(e,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                            ))
                                 .toList(),
                             onChanged: _enabledDropdownNewEnc
                                 ? (String? newValue) {
-                                    setState(() {
-                                      print(newValue);
-                                      _caseType = newValue!;
-                                    });
-                                  }
+                              setState(() {
+                                print(newValue);
+                                _caseType = newValue!;
+                              });
+                            }
                                 : null),
                       ),
                     ),
@@ -639,39 +653,40 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
                       child: DropdownButtonFormField(
-                          key: UniqueKey(),
-                          isExpanded: true,
-                          validator: (value) {
-                            if (value == "") {
-                              return 'Please enter country';
+                        key: UniqueKey(),
+                        isExpanded: true,
+                        validator: (value) {
+                          if (value == "") {
+                            return 'Please enter country';
+                          }
+                          return null;
+                        },
+                        // hint: Text("Country"),
+                        value: _country,
+                        decoration: InputDecoration(
+                            floatingLabelBehavior:
+                            FloatingLabelBehavior.always,
+                            contentPadding:
+                            EdgeInsets.fromLTRB(10, 10, 10, 10),
+                            border: OutlineInputBorder(),
+                            labelText: "Country"),
+                        items: countries
+                            .map((e) =>
+                        new DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ))
+                            .toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _country = newValue!;
+                            if (_country == "United States") {
+                              _location = "Domestic";
+                            } else {
+                              _location = "INTL";
                             }
-                            return null;
-                          },
-                          // hint: Text("Country"),
-                          value: _country,
-                          decoration: InputDecoration(
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              contentPadding:
-                                  EdgeInsets.fromLTRB(10, 10, 10, 10),
-                              border: OutlineInputBorder(),
-                              labelText: "Country"),
-                          items: countries
-                              .map((e) => new DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ))
-                              .toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _country = newValue!;
-                              if (_country == "United States") {
-                                _location = "Domestic";
-                              } else {
-                                _location = "INTL";
-                              }
-                            });
-                          }),
+                          });
+                        }),
                     ),
                   ),
                 ]),
@@ -733,10 +748,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             labelText: "Direction"),
                         value: _call_dir,
                         items: call_direction
-                            .map((e) => new DropdownMenuItem(
-                                  value: e,
-                                  child: Text(e),
-                                ))
+                            .map((e) =>
+                        new DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ))
                             .toList(),
                         onChanged: (String? newValue) {
                           setState(() {
@@ -780,10 +796,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             // hintText: "Contact"
                           ),
                           items: tx_types
-                              .map((e) => new DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ))
+                              .map((e) =>
+                          new DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
                               .toList(),
                           onChanged: (String? newValue) {
                             _tx_type = newValue!;
@@ -814,10 +831,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             // hintText: "Contact"
                           ),
                           items: extn
-                              .map((e) => new DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ))
+                              .map((e) =>
+                          new DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
                               .toList(),
                           onChanged: (String? newValue) {
                             setState(() {
@@ -910,7 +928,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         border: OutlineInputBorder(),
                         labelText: "Minutes",
                         // floatingLabelBehavior: FloatingLabelBehavior.always,
-                        // hintText: "Minutes",
+                        //hintText: "MM:SS",
                         focusColor: Colors.yellow[100],
                         fillColor: Colors.yellow[50],
                       ),
@@ -934,10 +952,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                 minTime: DateTime(2020, 1, 1),
                                 maxTime: DateTime(2030, 1, 1),
                                 onConfirm: (date) {
-                              setState(() {
-                                _call_date = date;
-                              });
-                            });
+                                  setState(() {
+                                    _call_date = date;
+                                  });
+                                });
                           },
                           child: Text("Pick Call Date"),
                           style: TextButton.styleFrom(
@@ -953,8 +971,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       _call_date == null
                           ? ""
                           : " |  " +
-                              _call_date.toString().substring(0, 16) +
-                              "  |",
+                          _call_date.toString().substring(0, 16) +
+                          "  |",
                     ),
                   )
                 ]),
@@ -979,10 +997,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             // hintText: "Contact"
                           ),
                           items: contact
-                              .map((e) => new DropdownMenuItem(
-                                    value: e,
-                                    child: Text(e),
-                                  ))
+                              .map((e) =>
+                          new DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
                               .toList(),
                           onChanged: (String? newValue) {
                             setState(() {
@@ -1029,8 +1048,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     //Transfer from
                     Expanded(
                       child: TextFormField(
-                          //  isExpanded: true,
-                          //key: UniqueKey(),
+                        //  isExpanded: true,
+                        //key: UniqueKey(),
 
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -1104,42 +1123,42 @@ class _MyHomePageState extends State<MyHomePage> {
                 Row(children: <Widget>[
                   Expanded(
                       child: CheckboxListTile(
-                    value: _eoc,
-                    onChanged: (val) {
-                      print("--------" + val.toString());
-                      setState(() => _eoc = val!);
-                    },
-                    subtitle: !_eoc
-                        ? Text(
-                            'Required.',
-                            style: TextStyle(color: Colors.red),
-                          )
-                        : null,
-                    title: new Text(
-                      'EOC',
-                      style: TextStyle(fontSize: 14.0),
-                    ),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    activeColor: Colors.green,
-                  )
-                      // child: CheckboxListTileFormField(
-                      //   validator: (value) {
-                      //     if (value == false) {
-                      //       return 'Please select EOC';
-                      //     }
-                      //     return null;
-                      //   },
-                      //
-                      //   onSaved: (bool value) {
-                      //     setState(() {
-                      //       _eoc = value;
-                      //       print(_eoc);
-                      //     });
-                      //   },
-                      //   title: Text("EOC"),
-                      //   //value: _eoc,
-                      // ),
+                        value: _eoc,
+                        onChanged: (val) {
+                          print("--------" + val.toString());
+                          setState(() => _eoc = val!);
+                        },
+                        subtitle: !_eoc
+                            ? Text(
+                          'Required.',
+                          style: TextStyle(color: Colors.red),
+                        )
+                            : null,
+                        title: new Text(
+                          'EOC',
+                          style: TextStyle(fontSize: 14.0),
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        activeColor: Colors.green,
                       )
+                    // child: CheckboxListTileFormField(
+                    //   validator: (value) {
+                    //     if (value == false) {
+                    //       return 'Please select EOC';
+                    //     }
+                    //     return null;
+                    //   },
+                    //
+                    //   onSaved: (bool value) {
+                    //     setState(() {
+                    //       _eoc = value;
+                    //       print(_eoc);
+                    //     });
+                    //   },
+                    //   title: Text("EOC"),
+                    //   //value: _eoc,
+                    // ),
+                  )
                 ]),
               ],
             ),
